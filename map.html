@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Визоград — карта</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="eyebrow">Визоград • Алексеевка</div>
+      <h1>Карта Визограда</h1>
+      <p class="lead">Интерактивная карта с метками, зумом и перетаскиванием.</p>
+
+      <nav class="nav">
+        <a href="index.html">Главная</a>
+        <a href="chronicle.html">Летопись</a>
+        <a href="buildings.html">Здания</a>
+        <a href="wars.html">Войны</a>
+        <a href="map.html">Карта</a>
+      </nav>
+
+      <div class="hero-flag"><img src="images/flag.png" alt="Флаг Визограда"></div>
+    </header>
+
+    <section id="map" class="section map-section">
+      <h2>Карта</h2>
+      <div class="map-toolbar">
+        <button type="button" id="mapZoomOut">−</button>
+        <button type="button" id="mapZoomReset">Сброс</button>
+        <button type="button" id="mapZoomIn">+</button>
+      </div>
+      <div class="map-shell" id="mapShell">
+        <div class="map-stage" id="mapStage">
+          <img class="map-image" src="images/vizograd.png" alt="Карта Визограда">
+        </div>
+      </div>
+      <p class="map-hint">Колёсико мыши — приближение и отдаление. Наведи на метку, чтобы увидеть название. Двойной клик или двойной тап приближает карту.</p>
+    </section>
+    <footer class="footer"><p>Повествование о Визограде • Алексеевка</p></footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
