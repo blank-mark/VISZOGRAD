@@ -1,16 +1,18 @@
-
 const mapShell = document.getElementById('mapShell');
 const mapStage = document.getElementById('mapStage');
-
+const mapImage = document.getElementById('mapImage');
 const zoomOutBtn = document.getElementById('mapZoomOut');
 const zoomInBtn = document.getElementById('mapZoomIn');
 const zoomResetBtn = document.getElementById('mapZoomReset');
+const zoomLabel = document.getElementById('mapZoomLabel');
+const fitBtn = document.getElementById('mapFit');
 
 let zoom = 1;
 let panX = 0;
 let panY = 0;
+
 const minZoom = 1;
-const maxZoom = 4;
+const maxZoom = 5;
 const step = 0.25;
 
 let isDragging = false;
@@ -19,17 +21,29 @@ let dragStartY = 0;
 let dragOriginX = 0;
 let dragOriginY = 0;
 let activePointerId = null;
+
 let lastTapTime = 0;
 let lastTapX = 0;
 let lastTapY = 0;
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function updateZoomLabel() {
+  if (zoomLabel) {
+    zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
+  }
+}
+
 function applyTransform() {
   if (!mapStage) return;
-  mapStage.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+  mapStage.style.transform = `translate3d(${panX}px, ${panY}px, 0) scale(${zoom})`;
+  updateZoomLabel();
 }
 
 function setZoom(nextZoom, anchorX = null, anchorY = null) {
-  const clamped = Math.max(minZoom, Math.min(maxZoom, nextZoom));
+  const clamped = clamp(nextZoom, minZoom, maxZoom);
   if (clamped === zoom) return;
 
   if (anchorX !== null && anchorY !== null) {
@@ -50,6 +64,23 @@ function resetView() {
   applyTransform();
 }
 
+function fitToScreen() {
+  if (!mapShell || !mapStage || !mapImage) return;
+
+  const shellRect = mapShell.getBoundingClientRect();
+  const naturalW = mapImage.naturalWidth || 1;
+  const naturalH = mapImage.naturalHeight || 1;
+
+  const scaleX = shellRect.width / naturalW;
+  const scaleY = shellRect.height / naturalH;
+  const fitted = clamp(Math.min(scaleX, scaleY), 0.6, maxZoom);
+
+  zoom = fitted;
+  panX = (shellRect.width - naturalW * fitted) / 2;
+  panY = (shellRect.height - naturalH * fitted) / 2;
+  applyTransform();
+}
+
 function zoomAtClientPoint(clientX, clientY, delta) {
   if (!mapShell) return;
   const rect = mapShell.getBoundingClientRect();
@@ -61,6 +92,7 @@ function zoomAtClientPoint(clientX, clientY, delta) {
 if (zoomInBtn) zoomInBtn.addEventListener('click', () => setZoom(zoom + step));
 if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => setZoom(zoom - step));
 if (zoomResetBtn) zoomResetBtn.addEventListener('click', resetView);
+if (fitBtn) fitBtn.addEventListener('click', fitToScreen);
 
 if (mapShell) {
   mapShell.addEventListener('wheel', (e) => {
@@ -72,12 +104,15 @@ if (mapShell) {
     if (e.button !== 0) return;
     isDragging = true;
     activePointerId = e.pointerId;
-    try { mapShell.setPointerCapture(activePointerId); } catch {}
     dragStartX = e.clientX;
     dragStartY = e.clientY;
     dragOriginX = panX;
     dragOriginY = panY;
     mapShell.classList.add('is-dragging');
+
+    try {
+      mapShell.setPointerCapture(activePointerId);
+    } catch {}
   });
 
   mapShell.addEventListener('pointermove', (e) => {
@@ -92,17 +127,19 @@ if (mapShell) {
     isDragging = false;
     activePointerId = null;
     mapShell.classList.remove('is-dragging');
-    try { mapShell.releasePointerCapture(e.pointerId); } catch {}
+    try {
+      mapShell.releasePointerCapture(e.pointerId);
+    } catch {}
   };
 
   mapShell.addEventListener('pointerup', stopDragging);
   mapShell.addEventListener('pointercancel', stopDragging);
+
   mapShell.addEventListener('mouseleave', () => {
-    if (isDragging) {
-      isDragging = false;
-      activePointerId = null;
-      mapShell.classList.remove('is-dragging');
-    }
+    if (!isDragging) return;
+    isDragging = false;
+    activePointerId = null;
+    mapShell.classList.remove('is-dragging');
   });
 
   mapShell.addEventListener('dblclick', (e) => {
@@ -134,24 +171,29 @@ if (mapShell) {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') resetView();
+  if (e.key === '+' || e.key === '=') setZoom(zoom + step);
+  if (e.key === '-') setZoom(zoom - step);
+  if (e.key.toLowerCase() === '0') resetView();
 });
 
-markers.forEach((m) => {
-  if (!mapStage) return;
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'map-marker';
-  btn.style.left = `${m.x}%`;
-  btn.style.top = `${m.y}%`;
-  btn.setAttribute('aria-label', m.name);
-  btn.innerHTML = `<span>${m.name}<small>${m.note}</small></span>`;
-  mapStage.appendChild(btn);
-});
+if (mapImage) {
+  if (mapImage.complete) {
+    fitToScreen();
+  } else {
+    mapImage.addEventListener('load', fitToScreen, { once: true });
+  }
+}
 
-applyTransform();
+window.addEventListener('resize', () => {
+  fitToScreen();
+});
 
 const path = location.pathname.split('/').pop();
 document.querySelectorAll('.nav a').forEach(a => {
   const href = a.getAttribute('href');
-  if (href === path || (path === '' && href === 'index.html')) a.classList.add('active');
+  if (href === path || (path === '' && href === 'index.html')) {
+    a.classList.add('active');
+  }
 });
+
+applyTransform();
