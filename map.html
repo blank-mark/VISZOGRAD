@@ -1,187 +1,65 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Визоград — карта</title>
-  <link rel="stylesheet" href="styles.css">
-  <style>
-    .map-wrap {
-      display: grid;
-      gap: 14px;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Карта Визограда</title>
+<link rel="stylesheet" href="styles.css">
 
-    .map-panel {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    }
+<style>
+.map-container{
+  max-width:1200px;
+  margin:auto;
+  text-align:center;
+}
 
-    .map-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
-    }
+.map-image{
+  width:100%;
+  height:auto;
+  border-radius:20px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.25);
+}
+</style>
 
-    .map-pill {
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.06);
-      font-weight: 600;
-    }
-
-    .map-toolbar {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .map-toolbar button {
-      min-width: 44px;
-      height: 40px;
-      padding: 0 14px;
-      border: 0;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .map-shell {
-      position: relative;
-      overflow: hidden;
-      min-height: 72vh;
-      border-radius: 26px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8), transparent 32%),
-        linear-gradient(180deg, rgba(120, 180, 255, 0.18), rgba(150, 220, 170, 0.16));
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
-      touch-action: none;
-      user-select: none;
-      cursor: grab;
-    }
-
-    .map-shell.is-dragging {
-      cursor: grabbing;
-    }
-
-    .map-stage {
-      position: absolute;
-      left: 0;
-      top: 0;
-      transform-origin: 0 0;
-      will-change: transform;
-    }
-
-    .map-image {
-      display: block;
-      width: min(1200px, 100vw);
-      max-width: none;
-      height: auto;
-      border-radius: 22px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.16);
-      pointer-events: none;
-    }
-
-    .map-hint {
-      margin: 0;
-      opacity: 0.8;
-      font-size: 14px;
-    }
-
-    .map-legend {
-      display: grid;
-      gap: 8px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.72);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .map-legend strong {
-      font-size: 15px;
-    }
-
-    @media (max-width: 700px) {
-      .map-shell {
-        min-height: 60vh;
-      }
-
-      .map-image {
-        width: 980px;
-      }
-    }
-  </style>
 </head>
 <body>
-  <div class="page">
-    <header class="hero">
-      <div class="eyebrow">Визоград • Алексеевка</div>
-      <h1>Карта Визограда</h1>
-      <p class="lead">Интерактивная карта с зумом, перетаскиванием и быстрым сбросом вида.</p>
 
-      <nav class="nav">
-        <a href="index.html">Главная</a>
-        <a href="chronicle.html">Летопись</a>
-        <a href="buildings.html">Здания</a>
-        <a href="wars.html">Войны</a>
-        <a href="map.html">Карта</a>
-      </nav>
+<div class="page">
 
-      <div class="hero-flag"><img src="images/flag.png" alt="Флаг Визограда"></div>
-    </header>
+<header class="hero">
+<div class="eyebrow">Визоград • Алексеевка</div>
+<h1>Карта Визограда</h1>
+<p class="lead">Городская карта.</p>
 
-    <section id="map" class="section map-section">
-      <h2>Карта</h2>
+<nav class="nav">
+<a href="index.html">Главная</a>
+<a href="chronicle.html">Летопись</a>
+<a href="buildings.html">Здания</a>
+<a href="wars.html">Войны</a>
+<a href="map.html">Карта</a>
+</nav>
 
-      <div class="map-wrap">
-        <div class="map-panel">
-          <div class="map-meta">
-            <span class="map-pill">Зум: <span id="mapZoomLabel">100%</span></span>
-            <span>Колёсико — масштаб</span>
-            <span>Перетаскивание — движение</span>
-            <span>Esc или 0 — сброс</span>
-          </div>
-          <div class="map-toolbar">
-            <button type="button" id="mapZoomOut">−</button>
-            <button type="button" id="mapFit">Вписать</button>
-            <button type="button" id="mapZoomReset">Сброс</button>
-            <button type="button" id="mapZoomIn">+</button>
-          </div>
-        </div>
+<div class="hero-flag">
+<img src="images/flag.png">
+</div>
 
-        <div class="map-shell" id="mapShell" aria-label="Интерактивная карта">
-          <div class="map-stage" id="mapStage">
-            <img class="map-image" id="mapImage" src="images/vizograd.png" alt="Карта Визограда">
-          </div>
-        </div>
+</header>
 
-        <div class="map-legend">
-          <strong>Что здесь есть</strong>
-          <div>• аккуратное масштабирование с привязкой к курсору</div>
-          <div>• плавное перемещение карты мышью или пальцем</div>
-          <div>• кнопка «Вписать», чтобы быстро вернуть карту в красивый вид</div>
-          <div>• без меток, чтобы карта не путала и выглядела чище</div>
-        </div>
-      </div>
+<section class="section">
 
-      <p class="map-hint">Двойной клик или двойной тап приближает карту. Метки убраны специально, чтобы не было неправильных точек.</p>
-    </section>
+<h2>Карта</h2>
 
-    <footer class="footer"><p>Повествование о Визограде • Алексеевка</p></footer>
-  </div>
-  <script src="script.js"></script>
+<div class="map-container">
+<img class="map-image" src="images/vizograd.png" alt="Карта Визограда">
+</div>
+
+</section>
+
+<footer class="footer">
+<p>Повествование о Визограде • Алексеевка</p>
+</footer>
+
+</div>
+
 </body>
 </html>
-
